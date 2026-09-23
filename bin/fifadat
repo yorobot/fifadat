@@ -6,7 +6,7 @@
 
 ##
 ## note - always use latest (local) if present
-$LOAD_PATH.unshift( '/sports/yorobot/sport.db.more/fifadat/lib' )
+$LOAD_PATH.unshift( '/sports/yorobot/fifadat/lib' )
 
 require 'fifadat'
 

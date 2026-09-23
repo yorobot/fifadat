@@ -1,9 +1,9 @@
 require 'hoe'
-## require './lib/fifadat/version.rb'
+require './lib/fifadat/version.rb'
 
 Hoe.spec 'fifadat' do
 
-  self.version = '0.0.1'
+  self.version = Fifadat::VERSION
 
   self.summary = "fifadat - get football data via the (unofficial) fifa api"
   self.description = summary
