@@ -44,7 +44,7 @@ def convert( slug:, season:,
 
 
    ## for match-by-match live reports
-   report_dir = "#{indir}/#{slug}/matches/#{season.to_path}"
+   report_dir   = "#{indir}/#{slug}/matches/#{season.to_path}"
    timeline_dir = "#{indir}/#{slug}/timelines/#{season.to_path}"
 
 
@@ -71,7 +71,16 @@ def convert( slug:, season:,
       ##   puts "warn no match report for #{_report_basename(m)}"
       ## end
 
-   if live
+
+   ###
+   ##   note - skip check for match events / goals etc.
+   ##      if not yet played!!!
+
+   if live && !(rec[:status] == 'TIMED' ||
+                rec[:status] == 'SCHED' || rec[:status] == 'SCHEDULED' ||
+                rec[:status] == 'LIVE')
+
+
       ## check for timeline
       timeline = _read_timeline( m, timeline_dir: timeline_dir )
       ## reuse generated output from report

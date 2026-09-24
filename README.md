@@ -4,6 +4,7 @@
 Gem(s)
 
 - [**fifadat**](fifadat)   - get football data via (unofficial) fifa api
+- [**fifadat-convert**](fifadat-convert)   - convert fifa api json
 
 
 

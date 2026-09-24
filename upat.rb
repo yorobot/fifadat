@@ -1,8 +1,9 @@
-require_relative './lib/fifadat'
+require_relative './fifadat-convert/lib/fifadat/convert'
 
 
 cache_dir    = '/sports/cache.fifadat'
-convert_dir  = '/sports/cache.api.fifa'
+## convert_dir  = '/sports/cache.api.fifa'
+convert_dir  = './tmp'
 
 
 name   = 'at'

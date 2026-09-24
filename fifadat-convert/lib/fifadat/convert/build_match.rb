@@ -4,7 +4,7 @@
 def _build_match( m )   ## use _fill/build_match_basics() or such ???
     rec = {}
 
-    ## 0 =>   FINISHED/complete (OK)
+       ## 0 =>   FINISHED/complete (OK)
        ## 1 =>   SCHEDULED/not yet played
        status = m['MatchStatus']
        timed  = m['TimeDefined']
