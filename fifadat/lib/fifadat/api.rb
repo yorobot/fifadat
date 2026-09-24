@@ -106,5 +106,27 @@ class Metal
       #API_ROOT/timelines/108/278491/278493/300424860?language=en-GB
       "#{BASE_URL}/timelines/#{idCompetition}/#{idSeason}/#{idStage}/#{idMatch}?language=en"
    end
+
+
+#############
+## more support urls
+
+#  list_countries
+# List FIFA countries and member associations (reference data),
+#  each with its idCountry
+
+   def self.countries_url
+      "#{BASE_URL}/countries?count=500&language=en"
+   end
+
+#  list_confederations
+#   List the six FIFA confederations
+#    (UEFA, CONMEBOL, CONCACAF, CAF, AFC, OFC), each with its idConfederation
+
+   def self.confederations_url
+      "#{BASE_URL}/confederations?language=en"
+   end
+
+
 end  ## class Metal
 end # class Fifa

@@ -1,12 +1,24 @@
 
 ## Endpoint reference (confirmed during investigation)
 
-Working: `/competitions`, `/competitions/{id}`, `/competitions/search?name=`,
-`/seasons?idCompetition=`, `/seasons/{id}`, `/stages?idCompetition=&idSeason=`,
+Working:
+`/competitions`,
+`/competitions/{id}`,
+`/competitions/search?name=`,
+
+`/seasons?idCompetition=`,
+`/seasons/{id}`,
+
+`/stages?idCompetition=&idSeason=`,
 `/calendar/matches?idCompetition=&idSeason=[&idStage=&idGroup=&count=]`,
 `/timelines/{c}/{s}/{st}/{m}`,
-`/live/football/{c}/{s}/{st}/{m}`, `/teams/{idTeam}`, `/stadiums/{idStadium}`, `/countries`,
-`/confederations`, picture CDN `/picture/tournaments-{format}-{size}/{idSeason}`.
+`/live/football/{c}/{s}/{st}/{m}`,
+
+ `/teams/{idTeam}`, `/stadiums/{idStadium}`,
+ `/countries`,
+ `/confederations`, picture CDN
+ `/picture/tournaments-{format}-{size}/{idSeason}`.
+
 
 Quirks / dead ends (don't waste time re-testing): no OpenAPI/Swagger spec (spec paths return Akamai
 `503`); `/calendar/standing` is dead (returns `200 null` for every competition/season/param, so no

@@ -18,8 +18,11 @@ require_relative 'fifadat/json'    ## read_json_v2, fetch_json, fetch_json_if, e
 ##  our own code
 require_relative 'fifadat/version'
 
-require_relative 'fifadat/config'  ## base
-require_relative 'fifadat/api'  ## base
+require_relative 'fifadat/helper'
+require_relative 'fifadat/config'
+require_relative 'fifadat/api'
+require_relative 'fifadat/types'
+
 require_relative 'fifadat/prepare'   ## "all-in-one" prepare (download cache) helpers etc.
 
 

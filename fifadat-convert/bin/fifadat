@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+## tip: to test run:
+##   $ ruby bin/fifadat
+
+
+##
+## note - always use latest (local) if present
+$LOAD_PATH.unshift( '/sports/yorobot/fifadat/fifadat/lib' )
+$LOAD_PATH.unshift( '/sports/yorobot/fifadat/fifadat-convert/lib' )
+
+
+require 'fifadat/convert'
+
+
+Fifadat.main( ARGV )

@@ -33,6 +33,12 @@ end
 
 
 
+=begin
+- [ ] add desc json samples here
+
+=end
+
+
 
 def desc( data )   ## get description
     return nil if data.nil? || (data.is_a?(Array) && data.empty?)
