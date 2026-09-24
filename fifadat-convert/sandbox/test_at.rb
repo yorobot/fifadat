@@ -18,10 +18,11 @@ convert_dir = './tmp'     ##  '/sports/cache.api.fifa'
 slug   =  'at.cup'
 season =  '2025/26'
 
+=begin
 convert( slug: slug, season: season,
                 indir:  cache_dir,
                 outdir: convert_dir )
-
+=end
 
 
 
