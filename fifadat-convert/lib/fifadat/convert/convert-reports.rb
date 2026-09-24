@@ -81,6 +81,13 @@ def convert_reports( slug:, season:,
 
 
    matches.each_with_index do |m, i|
+       ## note skip if SCHEDULED == 1
+       ##   0 =>   FINISHED/complete (OK)
+       ##   1 =>   SCHEDULED/not yet played
+
+       next if m['MatchStatus'] == 1
+
+
       live     = _read_report( m, report_dir: report_dir )
 
       ## no report found; continue
