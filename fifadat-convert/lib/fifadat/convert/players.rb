@@ -1,4 +1,7 @@
 
+#
+# note - players here are for lineup (subs+bookings) and incl. starter/bench AND pos etc.
+#               do NOT use for team squads
 
 
 def build_players( recs )

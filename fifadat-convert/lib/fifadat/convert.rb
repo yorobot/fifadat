@@ -51,7 +51,6 @@ require_relative 'convert/penalties'
 require_relative 'convert/substitutions'
 
 
-require_relative 'convert/build_match'
 require_relative 'convert/build_report'
 require_relative 'convert/convert'
 require_relative 'convert/convert-reports'
@@ -62,9 +61,12 @@ require_relative 'convert/helper-minute'
 
 
 
-require_relative 'models/stages'
-require_relative 'models/teams'
-require_relative 'models/stadiums'
+require_relative 'models/stage'
+require_relative 'models/team'
+require_relative 'models/stadium'
+require_relative 'models/match'
+require_relative 'models/goal'
+
 
 require_relative 'tables/stages'
 require_relative 'tables/teams'

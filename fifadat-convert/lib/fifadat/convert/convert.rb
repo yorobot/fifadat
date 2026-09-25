@@ -14,6 +14,7 @@ def convert( slug:, season:,
     data[:meta] = { slug:      slug,
                     season:    season.to_s,
                     generated: Time.now.to_s,
+                    version:   FifadatConvert::VERSION,
                   }
 
 
@@ -43,6 +44,14 @@ def convert( slug:, season:,
    data[:stadiums] = stadiums.as_json
 
 
+   data[:meta][:teams] = teams.size
+   data[:meta][:matches] = matches.size
+   data[:meta][:stages] = stages.size
+   data[:meta][:stadiums] = stadiums.size
+
+
+
+
    ## for match-by-match live reports
    report_dir   = "#{indir}/#{slug}/matches/#{season.to_path}"
    timeline_dir = "#{indir}/#{slug}/timelines/#{season.to_path}"
@@ -56,8 +65,9 @@ def convert( slug:, season:,
 
 
         ## add/fill-up match basic
-       rec = _build_match( m, teams:    teams,
-                              stadiums: stadiums )
+       rec = Match.build( m,  teams:    teams,
+                              stadiums: stadiums,
+                              stages:   stages )
 
 
    ### get match (live) details
@@ -77,9 +87,9 @@ def convert( slug:, season:,
    ##   note - skip check for match events / goals etc.
    ##      if not yet played!!!
 
-   if live && !(rec[:status] == 'TIMED' ||
-                rec[:status] == 'SCHED' || rec[:status] == 'SCHEDULED' ||
-                rec[:status] == 'LIVE')
+   if live && !(rec.status == 'TIMED' ||
+                rec.status == 'SCHED' || rec.status == 'SCHEDULED' ||
+                rec.status == 'LIVE')
 
 
       ## check for timeline
@@ -87,10 +97,11 @@ def convert( slug:, season:,
       ## reuse generated output from report
         report = _build_report( live, timeline )
 
+
         ## try  update of score via goals from (match) report
         score_more =  _build_report_score( live, timeline )
         if score_more
-           rec[:score] = rec[:score].merge( score_more )
+           rec.score = {}.merge( rec.score||{}, score_more )
         end
 
 
@@ -102,18 +113,15 @@ def convert( slug:, season:,
        if goals1.empty? && goals2.empty?
           ## skip if no goals
        else
-         rec[:goals1] = goals1
-         rec[:goals2] = goals2
-
-
-
+         rec.goals1 = goals1
+         rec.goals2 = goals2
        end
 
 
        #########
        ##  add penalties
          penalties = report[:penalties]
-          rec[:penalties] = penalties   if penalties && !penalties.empty?
+          rec.penalties = penalties   if penalties && !penalties.empty?
 
 
       sentoff1 =  (report[:red1]||[]) + (report[:yellowred1]||[])
@@ -123,8 +131,8 @@ def convert( slug:, season:,
       sentoff1 = sentoff1.sort { |l,r|  l[:minute] <=> r[:minute] }
       sentoff2 = sentoff2.sort { |l,r|  l[:minute] <=> r[:minute] }
 
-     rec[:sentoff1] = sentoff1    unless sentoff1.empty?
-     rec[:sentoff2] = sentoff2    unless sentoff2.empty?
+     rec.sentoff1 = sentoff1    unless sentoff1.empty?
+     rec.sentoff2 = sentoff2    unless sentoff2.empty?
  end
 
 
@@ -154,7 +162,7 @@ def convert( slug:, season:,
     if officials.empty?
        ## puts "!! WARN no refs / officials found"
     else
-         rec[:referees] = officials
+         rec.referees = officials
     end
 
 
@@ -162,7 +170,7 @@ def convert( slug:, season:,
 
       recs << rec
    end
-   data[:matches] = recs
+   data[:matches] = recs.as_json
 
 
     outpath =  "#{outdir}/#{season.to_path}/#{slug}.json"
