@@ -111,6 +111,15 @@ class Metal
 #############
 ## more support urls
 
+    # get_team
+    #   Get a national team or club by its idTeam: name, abbreviation, country,
+    #     home city, and stadium.
+    #     Surfaces idStadium so you can chain to get_stadium.
+   def self.team_url( idTeam: )        ## note - singular (NOT plural)
+      "#{BASE_URL}/teams/#{idTeam}?language=en"
+   end
+
+
 #  list_countries
 # List FIFA countries and member associations (reference data),
 #  each with its idCountry

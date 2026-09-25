@@ -75,6 +75,11 @@ def convert_reports( slug:, season:,
    puts "  #{matches.size} match(es) in season #{season}"
 
 
+   teams = Teams.new
+   teams.add_matches( matches )
+
+
+
    report_dir = "#{indir}/#{slug}/matches/#{season.to_path}"
    timeline_dir = "#{indir}/#{slug}/timelines/#{season.to_path}"
 
@@ -103,8 +108,9 @@ def convert_reports( slug:, season:,
                   season: season.to_s,
                   generated: Time.now.to_s,
                }
-            }.merge( _build_match( live ),
+            }.merge( _build_match( live, teams: teams ),
                      _build_report( live, timeline ))
+
 
       ## try  update of score via goals from report
       score_more =  _build_report_score( live, timeline )

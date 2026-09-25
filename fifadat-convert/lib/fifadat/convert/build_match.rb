@@ -1,7 +1,7 @@
 
 
 
-def _build_match( m )   ## use _fill/build_match_basics() or such ???
+def _build_match( m, teams:, stadiums: )   ## use _fill/build_match_basics() or such ???
     rec = {}
 
        ## 0 =>   FINISHED/complete (OK)
@@ -55,17 +55,17 @@ def _build_match( m )   ## use _fill/build_match_basics() or such ???
 
 
        if m['HomeTeam'] && m['AwayTeam']   ## assume match reports
-         team1 = build_team( m['HomeTeam'] )
-         team2 = build_team( m['AwayTeam'] )
+         team1 = teams.find!( m['HomeTeam'] )
+         team2 = teams.find!( m['AwayTeam'] )
           ##  use full team details here (via lookup)
          ##         when report (mode) - why? why not?
-         rec[:team1] = team1[:name]
-         rec[:team2] = team2[:name]
+         rec[:team1] = team1.name
+         rec[:team2] = team2.name
        else
-         team1 =  build_team( m['Home'] )
-         team2 =  build_team( m['Away'] )
-         rec[:team1] = team1[:name]
-         rec[:team2] = team2[:name]
+         team1 =  teams.find!( m['Home'] )
+         team2 =  teams.find!( m['Away'] )
+         rec[:team1] = team1.name
+         rec[:team2] = team2.name
        end
 
 
@@ -84,17 +84,17 @@ def _build_match( m )   ## use _fill/build_match_basics() or such ???
 
 
        ## add country to stadium too - why? why not?
-       stadium = build_stadium( m['Stadium'] )
+       stadium = stadiums.find!( m['Stadium'] )
 
 
        if m['HomeTeam'] && m['AwayTeam']   ## assume match reports
-         rec[:stadium] = {  name: stadium[:name],
-                            city: stadium[:city],
-                            street: stadium[:street],
-                            country: stadium[:country] }
+         rec[:stadium] = {  name: stadium.name,
+                            city: stadium.city,
+                            street: stadium.street,
+                            country: stadium.country }
        else
-          rec[:stadium] = {  name:    stadium[:name],
-                              city:    stadium[:city] }
+          rec[:stadium] = {   name:    stadium.name,
+                              city:    stadium.city }
        end
 
        attendance = m['Attendance']

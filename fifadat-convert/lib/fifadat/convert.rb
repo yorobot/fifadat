@@ -3,6 +3,37 @@ $LOAD_PATH.unshift( '/sports/yorobot/fifadat/fifadat/lib' )
 require 'fifadat'
 
 
+# module JsonSerializable
+#  def to_json(*args)
+#    as_json.to_json(*args)
+#  end
+# end
+
+###
+##  add as_json  to Object/Array/Hash
+class Object
+  def as_json(*)
+    self
+  end
+end
+
+class Array
+  def as_json(*)
+    map { |v| v.as_json }
+  end
+end
+
+class Hash
+  def as_json(*)
+    each_with_object({}) do |(k, v), h|
+      h[k.to_s] = v.as_json
+    end
+  end
+end
+
+
+
+
 ## our own code
 require_relative 'convert/version'
 require_relative 'convert/tool'    ## fifadat command-line tool
@@ -11,9 +42,6 @@ require_relative 'convert/tool'    ## fifadat command-line tool
 require_relative 'convert/norm'
 require_relative 'convert/errata'
 
-require_relative 'convert/stages'
-require_relative 'convert/teams'
-require_relative 'convert/stadiums'
 require_relative 'convert/players'
 
 require_relative 'convert/officials'   ## aka referees
@@ -31,6 +59,17 @@ require_relative 'convert/convert-reports'
 require_relative 'convert/helper-date'
 require_relative 'convert/helper-score'
 require_relative 'convert/helper-minute'
+
+
+
+require_relative 'models/stages'
+require_relative 'models/teams'
+require_relative 'models/stadiums'
+
+require_relative 'tables/stages'
+require_relative 'tables/teams'
+require_relative 'tables/stadiums'
+
 
 
 

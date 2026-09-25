@@ -15,19 +15,17 @@ require 'fifadat/convert'
 cache_dir   = '/sports/cache.fifadat'
 convert_dir = './tmp'     ##  '/sports/cache.api.fifa'
 
-slug   =   'at'   ## 'at.cup'
+slug   =   'at.cup'    #'at'   ## 'at.cup'
 season =  '2026/27'
 
 
-=begin
 convert( slug: slug, season: season,
                 indir:  cache_dir,
                 outdir: convert_dir )
-=end
 
-convert_reports( slug: slug, season: season,
-                         indir: cache_dir,
-                         outdir: convert_dir )
+# convert_reports( slug: slug, season: season,
+#                         indir: cache_dir,
+#                         outdir: convert_dir )
 
 
 

@@ -1,5 +1,4 @@
 
-
 def build_stadium( h )
    if h
      id         = h['IdStadium']
@@ -49,51 +48,3 @@ def build_stadium( h )
       rec
    end
 end
-
-
-
-
-class Stadiums
-   def initialize
-      @recs = {}
-   end
-
-   def add_matches( matches )  ## rename to add_matches - why? why not?
-     matches.each_with_index do |m|
-       stadium = build_stadium( m['Stadium'] )
-       _add( stadium )
-     end
-   end
-
-
-
-   def _add( new_rec )
-      rec =  @recs[ new_rec[:id] ]
-      if rec.nil?
-          rec = new_rec
-          rec[:count] = 1   ## add counter - why? why not?
-          @recs[ new_rec[:id]] = new_rec
-      else
-          rec[:count] += 1
-
-          ## assert attributes equal - why? why not?
-         assert( new_rec[:name]     == rec[:name] &&
-                  new_rec[:city]    == rec[:city] &&
-                  new_rec[:country] == rec[:country],
-                  "stadium records NOT matching - #{rec.pretty_inspect} != #{new_rec.pretty_inspect}")
-      end
-   end
-
-
-   def as_json( id: false )
-      if id
-        @recs.values
-      else
-        @recs.values.map { |rec| rec.except(:id ) }
-      end
-   end
-
-
-   def size() @recs.size; end
-
-end  # class Stadiums

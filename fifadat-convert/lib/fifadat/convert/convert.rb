@@ -56,7 +56,8 @@ def convert( slug:, season:,
 
 
         ## add/fill-up match basic
-       rec = _build_match( m )
+       rec = _build_match( m, teams:    teams,
+                              stadiums: stadiums )
 
 
    ### get match (live) details
