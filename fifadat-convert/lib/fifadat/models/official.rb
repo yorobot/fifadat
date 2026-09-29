@@ -1,5 +1,24 @@
 
 =begin
+
+=begin
+   "Officials":
+     [{"IdCountry": "BRA",
+       "OfficialId": "361561",
+       "NameShort": [{"Locale": "en-GB", "Description": "Wilton SAMPAIO"}],
+       "Name": [{"Locale": "en-GB", "Description": "Wilton SAMPAIO"}],
+       "OfficialType": 1,
+       "TypeLocalized": [{"Locale": "en-GB", "Description": "Referee"}]},
+      {"IdCountry": "PAR",
+       "OfficialId": "416159",
+       "NameShort":
+        [{"Locale": "en-GB", "Description": "Juan Gabriel BENITEZ"}],
+       "Name": [{"Locale": "en-GB", "Description": "Juan Gabriel Benítez"}],
+       "OfficialType": 4,
+       "TypeLocalized":
+        [{"Locale": "en-GB", "Description": "Fourth official"}]}],
+
+
   "Officials":
      [{"IdCountry": "URU",
        "OfficialId": "61038",
@@ -25,13 +44,16 @@
 =end
 
 
+class Official
+
   TYPE_OFFICIAL = {
     1 => 'Referee',
     2 => 'Assistant Referee 1',
     3 => 'Assistant Referee 2',
   }
 
-def build_official( h, id: )
+
+def self.build( h )
     name = desc( h['Name'] )
 
     ## fix - use norm_official
@@ -40,29 +62,23 @@ def build_official( h, id: )
     idCountry = h['IdCountry']
     type      = h['OfficialType']
 
-
     assert( is_alpha?(name), "official name alpha expected; got #{pp_alpha(name)}" )
-
-
 
     assert( [1,2,3,4,5,6,7,8,9,10].include?( type ), "official type 1/2/3/4/5/6/7/8/9/10 expected; got #{type}" )
 
-    rec = {}
-    rec[:id] = h['OfficialId']   if id
+    rec = {   id:  h['OfficialId'],
+              name:      name,
+              country:   idCountry,
+              type:      TYPE_OFFICIAL[type]  ## change type to literal string
+           }
 
-    rec.merge!( name:      name,
-                country:   idCountry,
-                type:      type )
+    new(**rec)
+end
 
-    rec
-   end
-
-
-def build_officials( recs, id: false )  ## use referees?
-    recs = recs.map  { |h| build_official( h, id: id ) }
+def self._build_ary( recs )  ## use referees?
 
     ## skip fourth official (4) for now
-    recs = recs.select { |h|  [1,2,3].include?( h[:type] ) }
+    recs = recs.select { |h|  [1,2,3].include?( h['OfficialType'] ) }
 
     ## sort by type 1/2/3
     ##  1 - referee
@@ -75,12 +91,34 @@ def build_officials( recs, id: false )  ## use referees?
     ##  8 - assistant var
     ##  9 - support var
     ## 10 - reserve assistant referee
+    recs = recs.sort { |l,r|  l['OfficialType'] <=> r['OfficialType'] }
 
 
-    recs = recs.sort { |l,r|  l[:type] <=> r[:type] }
-
-    ## change type to literal string
-    recs = recs.map { |h| h[:type]=TYPE_OFFICIAL[h[:type]]; h }
+    recs = recs.map  { |h| build( h ) }
 
     recs
 end
+
+attr_reader :id, :name, :country, :type
+
+def initialize( id:, name:, country:, type:)
+  @id   = id
+  @name    = name
+  @country = country
+  @type    = type
+end
+
+   def as_json(*)
+      h = {
+            'name'      => name,
+            'country'   => country,
+            'type'      => type,
+          }
+      h
+   end
+
+
+
+
+
+end # class Official

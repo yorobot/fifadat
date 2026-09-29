@@ -89,8 +89,9 @@ def self.build( m, teams:, stadiums:, stages: )   ## use _fill/build_match_basic
    ##   see openliga etc.
 
      score = _parse_score( m )
-     rec[:score] = score      unless score.empty?
 
+
+      rec[:score] = score
 
        ## check - never in use?
        rec[:home]  = true    if m['IsHome']
@@ -120,7 +121,7 @@ attr_accessor :score,
               :goals1, :goals2,
               :penalties,
               :sentoff1, :sentoff2,
-              :referees
+              :officials
 
 
 def initialize(
@@ -202,15 +203,15 @@ def as_json(*)
          h['goals2']  = (goals2 || []).as_json
        end
 
-       h['penalities']   if penalties
+       h['penalities'] = penalties.as_json    if penalties
 
        if sentoff1 || sentoff2
-         h['sentoff1']  = sentoff1 || []
-         h['sentoff2']  = sentoff2 || []
+         h['sentoff1']  = (sentoff1 || []).as_json
+         h['sentoff2']  = (sentoff2 || []).as_json
        end
 
 
-       h['referees'] = referees    if referees
+       h['referees'] = officials.as_json    if officials
     h
 end
 

@@ -17,13 +17,14 @@
      [{"Locale": "en-GB",
        "Description":
         "David BATTY (England) misses from the penalty spot!"}]}],
- "Properties": {},
- "IsUpdateable": null}
+   }
 =end
 
 
-def build_penalty( h, players:,
-                      team1_id:, team2_id: )
+class Penalty
+
+def self.build( h, players:,
+                    team1_id:, team2_id: )
 
     ## note - do NOT care about minutes in penalty shootout
     ##   check for period == 11 (penalty shotout!!)
@@ -31,8 +32,9 @@ def build_penalty( h, players:,
 
 
      ##########
-     ##  0 - goal   (when penalty awared used before)
+     ##  0 - goal   (when penalty awarded used before)
      ## 41 - penalty goal
+     ##
      ## 46 - penalty missed
      ##   Dragan STOJKOVIC (Yugoslavia) rattles the crossbar from the spot!
      ## 51 - penalty missed
@@ -78,27 +80,27 @@ def build_penalty( h, players:,
 =end
 
       if idPlayer.nil?
-         puts "!! no idPlayer for penalty!"
+         puts "!! no idPlayer for penalty (timeline event):"
          pp h
-          ##exit 1
+          ## exit 1
           ## use 'N.N.'
 
-          rec[ :name ] = 'N.N.'
-
+        rec[ :player ] = Player::PLAYER_NIL
       else
-        rec[ :name ] = players.find!( idPlayer )[:name]
+        rec[ :player ] = players.find!( idPlayer )
       end
 
-       rec[:meta] = {  type: type,
+       rec[:more] = {  type: type,
                        desc: desc(h['EventDescription'])  ## add event desc too - why? why not?
                     }
-     rec
+
+     new( **rec )
 end
 
 
 
 
-def build_penalties( recs, players:,
+def self._build_ary( recs, players:,
                            team1_id:, team2_id: )
      ################
      ## type:
@@ -125,8 +127,41 @@ def build_penalties( recs, players:,
                         end
 
 
-    recs = recs.map { |h| build_penalty( h, players: players,
-                                            team1_id: team1_id,
-                                            team2_id: team2_id ) }
+    recs = recs.map { |h| build( h, players: players,
+                                    team1_id: team1_id,
+                                    team2_id: team2_id ) }
     recs
 end
+
+
+
+attr_reader :player, :team,
+            :score, :scored,
+            :more
+
+def initialize( player:,
+                team:,
+                score:,
+                scored:,
+                more: {} )
+   @player = player
+   @team   = team    ## e.g. 1|2
+   @score  = score   ## e.g. [1,0]
+   @scored = scored  ## e.g. true|false
+   @more   = more
+end
+
+
+def as_json(*)
+      h = {
+            'name'     => player.name,
+            'minute'   => minute,
+            'score'    => score,
+            'scored'   => scored,
+            'team'     => team,
+          }
+
+       h['more']   = more    unless more.empty?
+       h
+end
+end  # class Penalty

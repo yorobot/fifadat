@@ -2,6 +2,27 @@
 class Goal
 
 
+## add alias _build_all or _build_collection or ?? - why? why not?
+def self._build_ary( recs, players:,
+                           penalties: false )
+
+    ## note - filter out penalties (from shoot-out)!!
+    ##    min > 120  (e.g. 121, etc.)
+    ##  note - use period (more reliable)
+    ##   period 11 is PENALTY_SHOOTOUT!!
+    if penalties == false
+       recs = recs.select { |rec| rec['Period'] != 11 }
+    end
+
+
+    recs = recs.map  { |h| build( h, players: players ) }
+
+    ## note - sort by minutes; goals may not be sorted
+    recs = recs.sort { |l,r| l.minute <=> r.minute }
+    recs
+end
+
+
 def self.build( h, players: )
 
     ## split into minute
@@ -40,16 +61,15 @@ def self.build( h, players: )
       idPlayer = h['IdPlayer']
 
       if idPlayer.nil?
-         puts "!! no idPlayer for goal!"
+         puts "!! no idPlayer for goal (live):"
          pp h
           ##exit 1
           ## use 'N.N.'
 
-          rec[ :name ] = 'N.N.'
+          rec[ :player ] = Player::PLAYER_NIL  ## 'N.N.'
 
       else
-        player = players.find!( idPlayer )
-        rec[ :name ] = player[ :name ]
+        rec[ :player ] = players.find!( idPlayer )
       end
 
      rec[ :minute] = minute
@@ -69,14 +89,16 @@ end
 
 
 
-attr_reader :name, :minute,
+
+
+attr_reader :player, :minute,
             :pen, :og
 
 def initialize(
-     name:,
+     player:,
      minute:,
      pen: false, og: false)
-  @name   = name
+  @player = player
   @minute = minute
   @pen    = pen
   @og     = og
@@ -85,7 +107,7 @@ end
 
 def as_json(*)
       h = {
-            'name'     => name,
+            'name'     => player.name,
             'minute'   => minute,
           }
 

@@ -3,66 +3,6 @@
 ##
 ##   read & build match report
 
-## use mk/build_report_basename - why? why not?
-##     fix-fix-fix - change to _match_basename !!!
-##        use by (match)report and (match)timeline !!!
-def _report_basename( m )
-      ### get match (live) details
-      team1_code = m['Home']['Abbreviation']
-      team2_code = m['Away']['Abbreviation']
-      localDateTime  = parse_date_utc( m['LocalDate'] )
-
-      ##  e.g.  2020-06-24_RAP-AUS__54545454
-      basename = String.new
-      basename += localDateTime.strftime('%Y-%m-%d')    ##   i) date
-      basename += "_#{team1_code}-#{team2_code}"        ##  ii) team1 v team2
-
-      basename
-end
-
-
-
-def _read_timeline( m, timeline_dir: )
-      return nil     if m['Home'].nil? || m['Away'].nil?
-
-      basename = _report_basename( m )
-      basename += "__#{m['IdMatch']}"
-
-      path = "#{timeline_dir}/#{basename}.json"
-
-      ## note - skip if no match report available!!!
-      if File.file?( path )
-         timeline = read_json_v2( path )
-         timeline
-      else
-         nil
-      end
-end
-
-def _read_report( m, report_dir: )
-      return nil     if m['Home'].nil? || m['Away'].nil?
-
-      ##  e.g.  2020-06-24_RAP-AUS__54545454
-      #   note - add match id for "raw" match reports!!!
-      basename = _report_basename( m )
-      basename += "__#{m['IdMatch']}"
-
-      ## #{indir}/#{slug}/matches/#{season.to_path}
-      path = "#{report_dir}/#{basename}.json"
-
-      ## note - skip if no match report available!!!
-      if File.file?( path )
-         live = read_json_v2( path )
-         live
-      else
-         nil
-      end
-end
-
-
-
-
-
 
 def convert_reports( slug:, season:,
                          indir: '.',
@@ -72,11 +12,20 @@ def convert_reports( slug:, season:,
 
    data =  read_json_v2( "#{indir}/#{slug}/#{season.to_path}_matches.json" )
    matches = data['Results']  ## only use results (match) array
-   puts "  #{matches.size} match(es) in season #{season}"
+   puts "  #{matches.size} match(es) in #{slug} #{season}"
 
+
+   ## read in stages
+   ##   incl.  SequenceOrder, StageLevel (optional)
+   stages = Stages.read( "#{indir}/#{slug}/misc/#{season.to_path}_stages.json" )
+   stages.add_matches( matches )
 
    teams = Teams.new
    teams.add_matches( matches )
+
+   stadiums = Stadiums.new
+   stadiums.add_matches( matches )
+
 
 
 
@@ -89,8 +38,10 @@ def convert_reports( slug:, season:,
        ## note skip if SCHEDULED == 1
        ##   0 =>   FINISHED/complete (OK)
        ##   1 =>   SCHEDULED/not yet played
+       ##   2 =>   LIVE
 
-       next if m['MatchStatus'] == 1
+       next if m['MatchStatus'] == 1 ||
+               m['MatchStatus'] == 2
 
 
       live     = _read_report( m, report_dir: report_dir )
@@ -101,27 +52,36 @@ def convert_reports( slug:, season:,
       ## check for optional timeline
       timeline = _read_timeline( m, timeline_dir: timeline_dir )
 
-      rec = {
+
+      rec    = Match.build( live,   teams:    teams,
+                                    stadiums: stadiums,
+                                    stages:   stages )
+
+
+       ## try  update of score via goals from (match) report
+        score_more =  _build_report_score( live, timeline )
+        if score_more
+           rec.score = {}.merge( rec.score||{}, score_more )
+        end
+
+
+      report = MatchReport.build( live, timeline )
+
+      data = {
                meta: {
                   name: desc(live['SeasonName']),
                   slug: slug,
                   season: season.to_s,
                   generated: Time.now.to_s,
                }
-            }.merge( _build_match( live, teams: teams ),
-                     _build_report( live, timeline ))
+            }
 
-
-      ## try  update of score via goals from report
-      score_more =  _build_report_score( live, timeline )
-      if score_more
-           rec[:score] = rec[:score].merge( score_more )
-      end
+      data = data.merge( rec.as_json, report.as_json )
 
 
       ## build basename e.g  2026-07-15_ARG-ENG
       basename = _report_basename( m )
       outpath = "#{outdir}/#{season.to_path}/#{slug}/#{basename}.json"
-      write_json( outpath, rec )
+      write_json( outpath, data )
    end
 end

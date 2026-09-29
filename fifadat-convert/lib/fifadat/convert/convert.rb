@@ -5,9 +5,30 @@ def convert( slug:, season:,
                 indir: '.',
                 outdir: './tmp' )
 
-    season = Season(season)
+   season = Season(season)
 
-    ## fix - change data to top or ??? - why? why not?
+
+   ### fix-fix-fix  change to read_json_results or ??? - why? why not?
+   matches =  read_json_v2( "#{indir}/#{slug}/#{season.to_path}_matches.json" )
+   matches = matches['Results']  ## only use results (match) array
+
+   ## pp matches
+   puts "  #{matches.size} match(es) in #{slug} #{season}"
+
+
+   ## read in stages
+   ##   incl.  SequenceOrder, StageLevel (optional)
+   stages = Stages.read( "#{indir}/#{slug}/misc/#{season.to_path}_stages.json" )
+   stages.add_matches( matches )
+
+   teams = Teams.new
+   teams.add_matches( matches )
+
+   stadiums = Stadiums.new
+   stadiums.add_matches( matches )
+
+
+
     data = {}
 
     ## add slug & seasons (add name to be done!!)
@@ -15,40 +36,15 @@ def convert( slug:, season:,
                     season:    season.to_s,
                     generated: Time.now.to_s,
                     version:   FifadatConvert::VERSION,
+                    teams:    teams.size,
+                    matches:  matches.size,
+                    stages:   stages.size,
+                    stadiums:  stadiums.size,
                   }
 
-
-   matches =  read_json_v2( "#{indir}/#{slug}/#{season.to_path}_matches.json" )
-   matches = matches['Results']  ## only use results (match) array
-
-   ## pp matches
-   puts "  #{matches.size} match(es) in season #{season}"
-
-
-  ## read in stages
-  ##   incl.  SequenceOrder, StageLevel (optional)
-  stages = Stages.read( "#{indir}/#{slug}/misc/#{season.to_path}_stages.json" )
-
-
-  stages.add_matches( matches )
-  data[:stages] = stages.as_json
-
-
-   teams = Teams.new
-   teams.add_matches( matches )
-   data[:teams] = teams.as_json
-
-
-   stadiums = Stadiums.new
-   stadiums.add_matches( matches )
+   data[:stages]   = stages.as_json
+   data[:teams]    = teams.as_json
    data[:stadiums] = stadiums.as_json
-
-
-   data[:meta][:teams] = teams.size
-   data[:meta][:matches] = matches.size
-   data[:meta][:stages] = stages.size
-   data[:meta][:stadiums] = stadiums.size
-
 
 
 
@@ -69,33 +65,24 @@ def convert( slug:, season:,
                               stadiums: stadiums,
                               stages:   stages )
 
-
-   ### get match (live) details
    ###
-   ##   check if match report exits
-   ##    optional for now!!
+   ##   note - skip check for match events / goals etc.
+   ##      if not yet played!!!
+     if !(rec.status == 'TIMED' ||
+          rec.status == 'SCHED' || rec.status == 'SCHEDULED' ||
+          rec.status == 'LIVE')
 
-      live = _read_report( m, report_dir: report_dir )
+      ### get match (live) details
+      ###
+       ##   check if match report & timeline exits
+      ##    optional for now!!
 
+      live     = _read_report( m, report_dir: report_dir )
+      timeline = _read_timeline( m, timeline_dir: timeline_dir )
 
       ## if live.nil?
       ##   puts "warn no match report for #{_report_basename(m)}"
       ## end
-
-
-   ###
-   ##   note - skip check for match events / goals etc.
-   ##      if not yet played!!!
-
-   if live && !(rec.status == 'TIMED' ||
-                rec.status == 'SCHED' || rec.status == 'SCHEDULED' ||
-                rec.status == 'LIVE')
-
-
-      ## check for timeline
-      timeline = _read_timeline( m, timeline_dir: timeline_dir )
-      ## reuse generated output from report
-        report = _build_report( live, timeline )
 
 
         ## try  update of score via goals from (match) report
@@ -105,72 +92,41 @@ def convert( slug:, season:,
         end
 
 
+        ## reuse generated output from report
+        report =  MatchReport.build( live, timeline )
 
-        goals1 = report[:goals1]
-        goals2 = report[:goals2]
+       ############
+       ## add goals
 
-
-       if goals1.empty? && goals2.empty?
+       if report.goals1.empty? && report.goals2.empty?
           ## skip if no goals
        else
-         rec.goals1 = goals1
-         rec.goals2 = goals2
+         rec.goals1 = report.goals1
+         rec.goals2 = report.goals2
        end
 
 
        #########
-       ##  add penalties
-         penalties = report[:penalties]
-          rec.penalties = penalties   if penalties && !penalties.empty?
+       ## add penalties
+       rec.penalties = report.penalties   if report.penalties &&
+                                            !report.penalties.empty?
 
 
-      sentoff1 =  (report[:red1]||[]) + (report[:yellowred1]||[])
-      sentoff2 =  (report[:red2]||[]) + (report[:yellowred2]||[])
+      sentoff1 = report.sentoff1
+      sentoff2 = report.sentoff2
+      rec.sentoff1 = sentoff1    unless sentoff1.empty?
+      rec.sentoff2 = sentoff2    unless sentoff2.empty?
 
-      ## sort by minute
-      sentoff1 = sentoff1.sort { |l,r|  l[:minute] <=> r[:minute] }
-      sentoff2 = sentoff2.sort { |l,r|  l[:minute] <=> r[:minute] }
-
-     rec.sentoff1 = sentoff1    unless sentoff1.empty?
-     rec.sentoff2 = sentoff2    unless sentoff2.empty?
- end
-
-
-
-=begin
-   "Officials":
-     [{"IdCountry": "BRA",
-       "OfficialId": "361561",
-       "NameShort": [{"Locale": "en-GB", "Description": "Wilton SAMPAIO"}],
-       "Name": [{"Locale": "en-GB", "Description": "Wilton SAMPAIO"}],
-       "OfficialType": 1,
-       "TypeLocalized": [{"Locale": "en-GB", "Description": "Referee"}]},
-      {"IdCountry": "PAR",
-       "OfficialId": "416159",
-       "NameShort":
-        [{"Locale": "en-GB", "Description": "Juan Gabriel BENITEZ"}],
-       "Name": [{"Locale": "en-GB", "Description": "Juan Gabriel Benítez"}],
-       "OfficialType": 4,
-       "TypeLocalized":
-        [{"Locale": "en-GB", "Description": "Fourth official"}]}],
-=end
-
-###
-##  add referees
-    officials = build_officials( m['Officials'], id: false )
-
-    if officials.empty?
-       ## puts "!! WARN no refs / officials found"
-    else
-         rec.referees = officials
-    end
-
-
+      ###
+      ##  add referees
+      rec.officials = report.officials   if report.officials && !report.officials.empty?
+      end
 
 
       recs << rec
    end
    data[:matches] = recs.as_json
+
 
 
     outpath =  "#{outdir}/#{season.to_path}/#{slug}.json"

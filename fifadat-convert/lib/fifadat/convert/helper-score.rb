@@ -14,6 +14,9 @@ def _parse_score( m )
 
 
   resultType  = m['ResultType']
+   ## add score[:type] - why? why not?
+   h[:type] =  RESULT_TYPE[resultType] || "???-#{resultType}"
+
 
   score =  if m['HomeTeam'] && m['AwayTeam']  ## assume inside (match) report
              [m['HomeTeam']['Score'], m['AwayTeam']['Score']].compact
@@ -72,68 +75,96 @@ end
 
 
 
-def _fmt_score( m )
+def _build_report_score( live, timeline=nil )
 
-   m = errata_autofix_score( m )
+    _scores = _build_score_from_goals( live )
 
-  ## m = (full) match hash incl.  IdMatch, etc.
-  ##  returns string e.g.  4-4  or 4-3 a.e.t etc
 
-  resultType  = m['ResultType']
+    score = nil
 
-  # resultType
-  #            0 =>  no result / not played yet
-  #            1 => regular (90 mins)
-  #            2 => aet (120 mins), win on pens
-  #            3 => aet (120 mins)
-  #            8 =>  same as 3?  -aet with golden goal/silver goal in 1998 FRA-PAR
+     case live['ResultType']
+     when 1,4
+         ## 1 => 'REGULAR',
+         ## 4 => 'REGULAR/AGG',  ##  aggregate (1st/2nd leg) - regular
+        ## add ht
+        ##  assert ft match
+        score      = {  ht: _scores[:ht][:score],
+                         ft: _scores[:ft][:score]
+                      }
+     when 3,5,8
+       score       = {   ht: _scores[:ht][:score],
+                         ft: _scores[:ft][:score],
+                         et: _scores[:et][:score],
+                      }
+     when 2
+        ##  todo/fix - pull in timeline check too to check
+        ##     if any events recorded for extra time!!
+        score      = {   ht: _scores[:ht][:score],
+                         ft: _scores[:ft][:score],
+                      }
 
-  score = if resultType == 2   ## aet, win on pens
-             "#{m['HomeTeamScore']}-#{m['AwayTeamScore']}" +
-             " a.e.t., #{m['HomeTeamPenaltyScore']}-#{m['AwayTeamPenaltyScore']} pen."
-           elsif resultType == 3 || resultType == 8  ## aet
-             "#{m['HomeTeamScore']}-#{m['AwayTeamScore']} a.e.t."
-           elsif  resultType == 1  ||  ## assume 1 - regular (90 mins+stoppage/injury time)
-                  resultType == 4
-              "#{m['HomeTeamScore']}-#{m['AwayTeamScore']}"
-           elsif  resultType == 0
-               ##  double check if score present
-               ##   e.g. pachuca vs salzburg in cwc 2025??
-               raise ArgumentError,
-                  " resultType == 0 but score present idMatch #{m['IdMatch']} #{m['HomeTeamScore']}-#{m['AwayTeamScore']}"  if m['HomeTeamScore'] &&
-                                                                                                                               m['AwayTeamScore']
-              ""
-           else
-              raise ArgumentError, "unknown/unexpected result type #{resultType}"
-           end
+        ## note - only incl. extra-time (et) if a goal scored in extra time
+        score[:et] = _scores[:et][:score]   unless _scores[:et][:minutes].empty?
+     end
 
-  score
+     score
 end
 
 
 
+def _build_score_from_goals( m )
+   ##
+   ## 5 periods - 3 (1ST_HALF), 5 (2ND_HALF),
+   ##             7 (EXTRA_TIME_1ST_HALF), 9 (EXTRA_TIME_2ND_HALF),
+   ##             11 (PENALTY_SHOOTOUT) possibly
+   ##
+   goals = {
+      count: 0,
+      score: [0,0],
+      ht:   { score: [0,0], minutes: [] },
+      ft:   { score: [0,0], minutes: [] },
+      et:   { score: [0,0], minutes: [] },
+      p:    { score: [0,0], minutes: [] },
+   }
 
-__END__
+   ## note - quick fix
+   ##            add  period 2  for USA v Belgium (PKO) - worldcup
 
-  score = if resultType == 2   ## aet, win on pens
-             { et: [m['HomeTeamScore'],m['AwayTeamScore']],
-               p:  [m['HomeTeamPenaltyScore'],m['AwayTeamPenaltyScore']] }
-           elsif resultType == 3 || resultType == 8  ## aet
-             { et: [m['HomeTeamScore'], m['AwayTeamScore']] }
-           elsif  resultType == 1  ||  ## assume 1 - regular (90 mins+stoppage/injury time)
-                  resultType == 4  ||
-                  m['IdMatch'] == '400019191'  ##  fix for pachuca vs salzburg !!!
-             { ft: [m['HomeTeamScore'],m['AwayTeamScore']] }
-           elsif  resultType == 12
-               ## fix/fix/fix - check for score too
-                nil
-           elsif  resultType == 0
-              ##  pachuca vs salzburg in cwc 2025??
-               ##  double check if score present
-               raise ArgumentError,
-                  " resultType == 0 but score present idMatch #{m['IdMatch']} #{m['HomeTeamScore']}-#{m['AwayTeamScore']}"  if m['HomeTeamScore'] &&
-                                                                                                                               m['AwayTeamScore']
-              nil
-           else
-              raise ArgumentError, "unknown/unexpected result type #{resultType}"
-           end
+   ## note - i is 0|1  -  array index for team
+   [m['HomeTeam']['Goals'],
+    m['AwayTeam']['Goals']].each_with_index do |recs,i|
+      recs.each do |h|
+
+        h = errata_autofix_goal( h )
+
+        period = h['Period']
+        ## include penalty shootout (11) - why? why not?
+        assert(  [3,5,7,9,11].include?(period),
+                  "goal in period 3/5/7/9/11 expected; got #{h.pretty_inspect} in match #{m.pretty_inspect}" )
+
+        minute = h['Minute']
+        key =  case period
+               when 3    then  :ht
+               when 5    then  :ft
+               when 7, 9 then  :et
+               when 11   then  :p
+               else
+                raise ArgumentError,
+                  "goal in period 3/5/7/9/11 expected; got #{h.pretty_inspect}"
+               end
+
+        goals[:count] += 1
+        goals[:score][i] += 1   unless key == :p
+        goals[key][:score][i] += 1
+      end
+   end
+
+   ## use/calc cummulative score  (BUT not for penalties)
+   goals[:ft][:score][0] += goals[:ht][:score][0]
+   goals[:ft][:score][1] += goals[:ht][:score][1]
+
+   goals[:et][:score][0] += goals[:ft][:score][0]
+   goals[:et][:score][1] += goals[:ft][:score][1]
+
+   goals
+end

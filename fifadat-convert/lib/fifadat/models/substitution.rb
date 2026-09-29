@@ -33,7 +33,10 @@
 
 
 
-def _build_sub_minute( h )
+class Sub       ## Substitution/SubOnOff  Event
+
+
+def self._build_sub_minute( h )
 
     ## split into minute
     ##  and offset (stoppage/injury/added time)
@@ -69,37 +72,109 @@ def _build_sub_minute( h )
 end
 
 
-
-def build_sub( h, players: )
+def self.build( h, players: )
 
       minute = _build_sub_minute( h )
 
       playerOff = players.find( h['IdPlayerOff'] )
       playerOn  = players.find( h['IdPlayerOn'] )
 
+       ## fix-fix-fix
+       ##  report warning if playerON nil!!!
        ## use N.N.  for  nil - why? why not?
-       playerOn = { name: 'N.N.'}      if playerOn.nil?
+       playerOn = Player::PLAYER_NIL      if playerOn.nil?
 
       assert( playerOff && playerOn,
                   "playerOff and/or playerOn is NIL in #{h.pretty_inspect}")
 
-      rec = { off:     playerOff[ :name ],
-              on:      playerOn[ :name ],
+      rec = { off:     playerOff,
+              on:      playerOn,
               minute:  minute
             }
 
-      rec
+      new( **rec )
 end
 
 
 
-def build_subs( recs, players: )
-    recs = recs.map  { |h| build_sub( h, players: players ) }
+def self._build_ary( recs, players: )
+    recs = recs.map  { |h| build( h, players: players ) }
     recs
 end
 
 
+
+attr_reader :off, :on, :minute
+
+def initialize( off:, on:, minute: )
+  @off    = off
+  @on     = on
+  @minute = minute
+end
+
+   def as_json(*)
+      h = {
+            'off'     => off.name,
+            'on'      => on.name,
+            'minute'   => minute
+          }
+      h
+   end
+
+end ## class Sub(stitution)
+
+
+
+
+
 __END__
+
+
+
+=begin
+ def add_subs( subs )
+        subs.each do |sub|
+
+          idPlayerOff = sub['IdPlayerOff']
+          idPlayerOn  = sub['IdPlayerOn']
+
+          ## note - parse & reformat minute for keep same format
+          minute  = _build_sub_minute( sub )
+
+          player_off = @recs[ idPlayerOff ]
+          player_on  = @recs[ idPlayerOn ]
+
+##
+##   note - skip special case for now
+##              with NO PLAYER ON (e.g. idPlayerOn is nil!!)
+       ##    next if idPlayerOn.nil?
+           ##  todo/fix - report/log warning!!!
+
+
+          if player_off.nil?
+             puts "!! player_off >#{idPlayerOff}< not found in:"
+             pp sub
+             puts "---"
+             pp @recs.values
+             exit 1
+          end
+
+          if player_on.nil?
+             puts "!! player_on >#{idPlayerOn}< not found in:"
+             pp sub
+             puts "---"
+             pp @recs.values
+             exit 1
+          end
+
+          assert( player_off && player_on,
+                  "subs player_off or player_on not found; sorry" )
+
+          player_off[ :sub ] = { minute: minute,
+                                 player_ref: player_on }
+        end
+   end
+=end
 
 
 !! ASSERT FAILED - playerOff and/or playerOn is NIL in {"IdEvent"=>nil,

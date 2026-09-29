@@ -42,16 +42,7 @@ require_relative 'convert/tool'    ## fifadat command-line tool
 require_relative 'convert/norm'
 require_relative 'convert/errata'
 
-require_relative 'convert/players'
-
-require_relative 'convert/officials'   ## aka referees
-require_relative 'convert/goals'
-require_relative 'convert/goals-calc_score'
-require_relative 'convert/penalties'
-require_relative 'convert/substitutions'
-
-
-require_relative 'convert/build_report'
+require_relative 'convert/reader'
 require_relative 'convert/convert'
 require_relative 'convert/convert-reports'
 
@@ -65,12 +56,20 @@ require_relative 'models/stage'
 require_relative 'models/team'
 require_relative 'models/stadium'
 require_relative 'models/match'
+require_relative 'models/match_report'
 require_relative 'models/goal'
+require_relative 'models/penalty'
+require_relative 'models/substitution'
+require_relative 'models/official'   ## aka referees
+require_relative 'models/player'   # note - is lineup player incl. starter/bench, position, etc.
+                                   #           (NOT squad player)
+
 
 
 require_relative 'tables/stages'
 require_relative 'tables/teams'
 require_relative 'tables/stadiums'
+require_relative 'tables/players'
 
 
 
