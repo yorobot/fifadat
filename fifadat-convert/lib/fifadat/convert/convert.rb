@@ -13,7 +13,7 @@ def convert( slug:, season:,
    matches = matches['Results']  ## only use results (match) array
 
    ## pp matches
-   puts "  #{matches.size} match(es) in #{slug} #{season}"
+   puts "==> convert - #{matches.size} match(es) in #{slug} #{season}"
 
 
    ## read in stages
@@ -70,9 +70,11 @@ def convert( slug:, season:,
    ##      if not yet played!!!
    #         1-scheduled and
    #         2-live
+   #         7-postponed (too)
    #    return empty score!!!
       if !(m['MatchStatus'] == 1 ||
-           m['MatchStatus'] == 2)
+           m['MatchStatus'] == 2 ||
+           m['MatchStatus'] == 7)
 
 
 

@@ -45,7 +45,8 @@ def prepare_reports( name:,
      matches = data['Results']
 
 
-    puts "  #{matches.size} match(es) in season #{season}"
+    puts "==> prepare reports - #{matches.size} match(es) in #{name} #{season}"
+
 
 
     matches.each_with_index do |m, i|
@@ -53,8 +54,6 @@ def prepare_reports( name:,
       idSeason      = m['IdSeason']
       idStage       = m['IdStage']
       idMatch       = m['IdMatch']
-
-      stageName   = desc( m['StageName'] )
 
 
       ## note - skip if teams not yet know
@@ -65,6 +64,21 @@ def prepare_reports( name:,
       ## todo/fix - check for MatchStatus and ResultType too
       ##  e.g. MatchStatus = 1  -- future
       ##       ResultType  = 0  -- not played yet
+
+    ##      if not yet played!!!
+   #         1-scheduled and
+   #         2-live
+   #         7-postponed !!!! (too)
+   #    return empty score!!!
+      if m['MatchStatus'] == 1 ||
+         m['MatchStatus'] == 2 ||
+         m['MatchStatus'] == 7
+           ## skip scheduled/live matches (not yet played)
+           next
+      end
+
+
+
 
       if m['Home'].nil? || m['Away'].nil?
          puts "[#{i+1}/#{matches.size}]  ??  ??, #{stageName}  (SKIPPED - TO BE DONE)"
@@ -85,16 +99,22 @@ def prepare_reports( name:,
       teamName2   = desc( m['Away']['TeamName'] )
       teamCode2   = m['Away']['Abbreviation']
 
+      stageName   = desc( m['StageName'] )
+      matchday    = m['MatchDay']
 
-      puts "[#{i+1}/#{matches.size}]  #{teamName1} #{teamName2}, #{stageName}, #{localDateTime}"
-
+      print "[#{i+1}/#{matches.size}]  "
+      print   MATCH_STATUS[m['MatchStatus']]||"???-#{m['MatchStatus']}"
+      print  "/"
+      print   RESULT_TYPE[m['ResultType']]||"???-#{m['ResultType']}"
+      print "  #{teamName1} (#{teamCode1}) v #{teamName2} (#{teamCode2}) | #{stageName} - #{matchday} | #{localDateTime}"
+      print "\n"
 
       outpath = "#{outdir}/#{name}/matches/#{season.to_path}/#{localDateTime.strftime('%Y-%m-%d')}_#{teamCode1}-#{teamCode2}__#{idMatch}.json"
 
       url = Fifa::Metal.live_url( idCompetition: idCompetition,
                                   idSeason:      idSeason,
                                   idStage:       idStage,
-                                 idMatch:       idMatch )
+                                  idMatch:       idMatch )
 
       fetch_json_if( url, outpath, force: force )
 
@@ -102,7 +122,7 @@ def prepare_reports( name:,
       ###
       ##   add timeline (only)  if score incl. penalty shoot-out
       resultType = m['ResultType']
-      if resultType == 2 ## (aet??) win on pens
+      if resultType == 2    ## win on pens
 
         ## download timeline
         outpath = "#{outdir}/#{name}/timelines/#{season.to_path}/#{localDateTime.strftime('%Y-%m-%d')}_#{teamCode1}-#{teamCode2}__#{idMatch}.json"

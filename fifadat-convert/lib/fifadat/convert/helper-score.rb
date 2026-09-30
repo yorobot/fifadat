@@ -7,10 +7,12 @@ def _parse_score( m )
    #  note: for match status
    #       1-scheduled and
    #       2-live
+   #       7-postponed
    #    return empty score!!!
 
    return h    if m['MatchStatus'] == 1 ||
-                  m['MatchStatus'] == 2
+                  m['MatchStatus'] == 2 ||
+                  m['MatchStatus'] == 7
 
 
 #

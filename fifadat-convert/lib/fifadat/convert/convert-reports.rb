@@ -12,7 +12,7 @@ def convert_reports( slug:, season:,
 
    data =  read_json_v2( "#{indir}/#{slug}/#{season.to_path}_matches.json" )
    matches = data['Results']  ## only use results (match) array
-   puts "  #{matches.size} match(es) in #{slug} #{season}"
+   puts "==> convert reports - #{matches.size} match(es) in #{slug} #{season}"
 
 
    ## read in stages
@@ -35,13 +35,20 @@ def convert_reports( slug:, season:,
 
 
    matches.each_with_index do |m, i|
+
+       print "."
+       print i+1    if (i+1) %10 == 0
+
+
        ## note skip if SCHEDULED == 1
        ##   0 =>   FINISHED/complete (OK)
        ##   1 =>   SCHEDULED/not yet played
        ##   2 =>   LIVE
+       ##   7 =>   POSTPONED
 
        next if m['MatchStatus'] == 1 ||
-               m['MatchStatus'] == 2
+               m['MatchStatus'] == 2 ||
+               m['MatchStatus'] == 7
 
 
       live     = _read_report( m, report_dir: report_dir )
@@ -84,4 +91,6 @@ def convert_reports( slug:, season:,
       outpath = "#{outdir}/#{season.to_path}/#{slug}/#{basename}.json"
       write_json( outpath, data )
    end
+
+   print "DONE\n"
 end
