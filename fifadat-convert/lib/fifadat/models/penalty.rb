@@ -155,7 +155,6 @@ end
 def as_json(*)
       h = {
             'name'     => player.name,
-            'minute'   => minute,
             'score'    => score,
             'scored'   => scored,
             'team'     => team,

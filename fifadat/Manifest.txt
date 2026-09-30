@@ -63,6 +63,11 @@ config/seasons/za.csv
 lib/fifadat.rb
 lib/fifadat/api.rb
 lib/fifadat/config.rb
+lib/fifadat/helper.rb
 lib/fifadat/json.rb
+lib/fifadat/pp/ppdebug.rb
+lib/fifadat/pp/ppmatch.rb
+lib/fifadat/pp/ppstats.rb
 lib/fifadat/prepare.rb
+lib/fifadat/types.rb
 lib/fifadat/version.rb

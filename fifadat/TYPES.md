@@ -6,6 +6,20 @@ see <lib/fifadat/types.rb>  for more
 
 
 ```
+We need another sample containing Position=4, 5, and/or more 6 players to determine that confidently.
+
+
+Position	0	Goalkeeper	High
+Position	1	Defender	High
+Position	2	Midfielder	High
+Position	3	Forward 	High
+Position    4         ?
+Position	5	Midfielder?	Low / needs more samples
+Position	6	Midfielder?	Low / needs more samples
+
+
+
+
  MatchStatus
               0 =>  complete ??
               1 =>  future  / not played yet

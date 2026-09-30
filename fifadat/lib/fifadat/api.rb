@@ -74,9 +74,17 @@ class Metal
 
 
 
+
    def self.squads_url( idSeason:, idCompetition: )
       ## API_ROOT/teams/squads/all/108/278491
       "#{BASE_URL}/teams/squads/all/#{idCompetition}/#{idSeason}"
+   end
+
+   def self.teams_url( idSeason: )
+     ## /competitions/teams/{season}
+     #  Teams participating in a competition/season
+      "#{BASE_URL}/competitions/teams/#{idSeason}" +
+         "?language=en"
    end
 
    def self.matches_url( idSeason: )
@@ -101,12 +109,25 @@ class Metal
       "#{BASE_URL}/live/football/#{idCompetition}/#{idSeason}/#{idStage}/#{idMatch}?language=en"
    end
 
+=begin
    def self.timeline_url( idCompetition:, idSeason:,
                                idStage:, idMatch: )
       #API_ROOT/timelines/108/278491/278493/300424860?language=en-GB
+
       "#{BASE_URL}/timelines/#{idCompetition}/#{idSeason}/#{idStage}/#{idMatch}?language=en"
    end
+=end
 
+   def self.timeline_url( idMatch: )
+      #API_ROOT/timelines/108/278491/278493/300424860?language=en-GB
+
+      ##
+      ## todo/check
+      ##   only use idMatch ??
+      ## e.g. GET https://api.fifa.com/api/v3/timelines/{matchId}?language=en
+
+      "#{BASE_URL}/timelines/#{idMatch}?language=en"
+   end
 
 #############
 ## more support urls
@@ -117,6 +138,13 @@ class Metal
     #     Surfaces idStadium so you can chain to get_stadium.
    def self.team_url( idTeam: )        ## note - singular (NOT plural)
       "#{BASE_URL}/teams/#{idTeam}?language=en"
+   end
+
+
+   ## note - singular (NOT plural)
+   #   Squad/player information
+   def self.squad_url( idTeam:, idCompetition:, idSeason: )
+      "#{BASE_URL}/teams/#{idTeam}/squad?idCompetition=#{idCompetition}&idSeason=#{idSeason}&language=en"
    end
 
 

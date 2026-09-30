@@ -77,7 +77,7 @@ else
         idCompetition = h[:idCompetition]
         comp = Fifa::COMPETITIONS[idCompetition]
         seasons = comp.values.map { |c| c[:season] }
-        puts "  #{code}   (#{seasons.size}) #{seasons.join(',')}"
+        puts "  #{code}   (#{seasons.size}) #{seasons.join(' ')}"
     end
     exit 1
   end

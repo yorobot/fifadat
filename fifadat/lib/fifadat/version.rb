@@ -2,7 +2,7 @@
 module Fifadat    ## use FifaApi or such - why? why not
   MAJOR = 2026    ## todo: namespace inside version or something - why? why not??
   MINOR = 9
-  PATCH = 23
+  PATCH = 30
   VERSION = [MAJOR,MINOR,PATCH].join('.')
 
   def self.version

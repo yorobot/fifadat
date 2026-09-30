@@ -22,6 +22,9 @@ def prepare( name:,
     fetch_json_if( Fifa::Metal.matches_url( idSeason: idSeason ),
                 "#{outdir}/#{name}/#{season.to_path}_matches.json", force: force )
 
+    fetch_json_if( Fifa::Metal.teams_url( idSeason: idSeason ),
+               "#{outdir}/#{name}/misc/#{season.to_path}_teams.json", force: force )
+
     fetch_json_if( Fifa::Metal.stages_url( idSeason: idSeason ),
                "#{outdir}/#{name}/misc/#{season.to_path}_stages.json", force: force )
 
@@ -86,9 +89,13 @@ def prepare_reports( name:,
       end
 
 
-      ### fix-fix-fix - use parse_date_utc !!!
-      dateTime       = parse_date( m['Date'] )    ## utc
-      localDateTime  = parse_date( m['LocalDate'] )
+      ### note - date is always utc without timezone even if local!!
+      ##         local is utc (plus/minus offset)!!!
+      ##  e.g.
+      ##     "Date":      "2026-08-02T15:00:00Z",
+      ##     "LocalDate": "2026-08-02T17:00:00Z",
+      dateTime       = parse_date_utc( m['Date'] )         ## utc
+      localDateTime  = parse_date_utc( m['LocalDate'] )
 
 
       ## pp m['Home']
@@ -100,14 +107,21 @@ def prepare_reports( name:,
       teamCode2   = m['Away']['Abbreviation']
 
       stageName   = desc( m['StageName'] )
-      matchday    = m['MatchDay']
+      ##  "MatchDay": null,
+      matchday    = m['MatchDay'] || '∅'
+      groupName   = desc( m['GroupName'] )
 
       print "[#{i+1}/#{matches.size}]  "
       print   MATCH_STATUS[m['MatchStatus']]||"???-#{m['MatchStatus']}"
       print  "/"
       print   RESULT_TYPE[m['ResultType']]||"???-#{m['ResultType']}"
-      print "  #{teamName1} (#{teamCode1}) v #{teamName2} (#{teamCode2}) | #{stageName} - #{matchday} | #{localDateTime}"
+      print "  #{teamName1} (#{teamCode1}) v #{teamName2} (#{teamCode2})"
+      print " | #{stageName} - #{matchday}"
+      print ", #{groupName}"     if groupName
+      print " | #{localDateTime}"
       print "\n"
+
+
 
       outpath = "#{outdir}/#{name}/matches/#{season.to_path}/#{localDateTime.strftime('%Y-%m-%d')}_#{teamCode1}-#{teamCode2}__#{idMatch}.json"
 
@@ -122,15 +136,16 @@ def prepare_reports( name:,
       ###
       ##   add timeline (only)  if score incl. penalty shoot-out
       resultType = m['ResultType']
-      if resultType == 2    ## win on pens
+      if resultType == 2      ## WIN_ON_PENS
 
         ## download timeline
         outpath = "#{outdir}/#{name}/timelines/#{season.to_path}/#{localDateTime.strftime('%Y-%m-%d')}_#{teamCode1}-#{teamCode2}__#{idMatch}.json"
 
-        url = Fifa::Metal.timeline_url( idCompetition: idCompetition,
-                                idSeason:      idSeason,
-                                idStage:       idStage,
-                                idMatch:       idMatch )
+#        url = Fifa::Metal.timeline_url( idCompetition: idCompetition,
+#                                idSeason:      idSeason,
+#                                idStage:       idStage,
+#                                idMatch:       idMatch )
+        url = Fifa::Metal.timeline_url( idMatch:idMatch )
 
        fetch_json_if( url, outpath, force: force )
     end
