@@ -16,14 +16,17 @@ class MatchReport
 
 
 def self.build( live, timeline=nil )
-      players  = Players.new   ## all players (team1+team2)
-      players.add( live['HomeTeam']['Players'] )
-      players.add( live['AwayTeam']['Players'] )
+      _players1 = Player._build_ary( live['HomeTeam']['Players'] )
+      _players2 = Player._build_ary( live['AwayTeam']['Players'] )
 
-      players1 = Players.new
-      players1.add( live['HomeTeam']['Players'] )
+      players  = Players.new      ## lookup all players (team1+team2)
+      players.add( _players1 )
+      players.add( _players2 )
+
+      players1 = Players.new      ## lookup players by team1/team2 only
+      players1.add( _players1 )
       players2 = Players.new
-      players2.add( live['AwayTeam']['Players'] )
+      players2.add( _players2 )
 
 
       o = new

@@ -186,7 +186,7 @@ def as_json(*)
        h['team1']  = team1.name
        h['team2']  = team2.name
 
-       h['score'] = score     if score
+       h['score'] = score     if score && !score.empty?
 
 
        if stadium

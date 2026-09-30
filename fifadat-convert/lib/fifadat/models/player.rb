@@ -41,6 +41,9 @@ end  # class Card
 
 
 
+def self._build_ary( recs )
+    recs.map { |h| build( h ) }
+end
 
 
 def self.build( h )

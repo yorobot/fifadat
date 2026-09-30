@@ -8,7 +8,7 @@
 
 MATCH_STATUS = {
   0 => 'END',     # finished
-  1 => 'SCHED',   # scheduled  (with or without time - see timed flag)
+  1 => 'SCHEDULED',   # scheduled  (with or without time - see timed flag)
   2 => 'LIVE',
 
   ## ???

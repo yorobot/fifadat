@@ -68,9 +68,13 @@ def convert( slug:, season:,
    ###
    ##   note - skip check for match events / goals etc.
    ##      if not yet played!!!
-     if !(rec.status == 'TIMED' ||
-          rec.status == 'SCHED' || rec.status == 'SCHEDULED' ||
-          rec.status == 'LIVE')
+   #         1-scheduled and
+   #         2-live
+   #    return empty score!!!
+      if !(m['MatchStatus'] == 1 ||
+           m['MatchStatus'] == 2)
+
+
 
       ### get match (live) details
       ###

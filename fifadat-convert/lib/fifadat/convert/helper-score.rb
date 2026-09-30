@@ -1,14 +1,24 @@
 
+
+def _parse_score( m )
+   h = { }
+
+   ###
+   #  note: for match status
+   #       1-scheduled and
+   #       2-live
+   #    return empty score!!!
+
+   return h    if m['MatchStatus'] == 1 ||
+                  m['MatchStatus'] == 2
+
+
 #
 # add quick fix for club world cup?!
 #      elsif  resultType == 1  ||  ## assume 1 - regular (90 mins+stoppage/injury time)
 #              resultType == 4  ||
 #        m['IdMatch'] == '400019191'  ##  fix for pachuca vs salzburg !!!
 #   has resultType == 0!!!
-
-
-def _parse_score( m )
-   h = { }
 
    m = errata_autofix_score( m )
 

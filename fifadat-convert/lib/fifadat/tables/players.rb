@@ -11,9 +11,12 @@ class Players
    end
 
    def add( recs )    ## rename to collect - why? why not?
-      recs.each do |h|
-          rec = _add( Player.build(h))
-          rec.count += 1    ## track usage - why? why not?
+      recs.each do |rec|
+          raise ArgumentError,
+                 "player (obj) expected; got #{rec.class.name} - #{rec.inspect}"  unless rec.is_a?( Player )
+
+          rec = _add( rec )
+          rec.count += 1       ## track usage - why? why not?
       end
    end
 
@@ -54,39 +57,29 @@ class Players
    ##    add alias (or rename) starter  ??
    ##   add new subs to  status == 2  - why? why not?
    def lineup
-      recs = @recs.values.select { |rec| rec.starter? }
-
-      ## recs = recs.map {|rec| rec.except( :id, :status, :count ) }
-      recs
+      @recs.values.select { |rec| rec.starter? }
    end
 
    def bench
-      recs = @recs.values.select { |rec| rec.bench? }
-
-      ## recs = recs.map {|rec| rec.except( :id, :status, :count ) }
-      recs
+      @recs.values.select { |rec| rec.bench? }
    end
-
-
 
 
    def redcards
-      recs = @recs.values.select { |rec| rec.red? }
-      recs = recs.map { |rec| rec.r }
-      recs
+      @recs.values.select { |rec| rec.red? }
+                  .map { |rec| rec.r }
    end
 
    def yellowcards
-      recs = @recs.values.select { |rec| rec.yellow? }
-      recs = recs.map { |rec| rec.y }
-      recs
+      @recs.values.select { |rec| rec.yellow? }
+                  .map { |rec| rec.y }
    end
 
    def yellowredcards
-      recs = @recs.values.select { |rec| rec.yellowred? }
-      recs = recs.map { |rec| rec.yr }
-      recs
+      @recs.values.select { |rec| rec.yellowred? }
+                  .map { |rec| rec.yr }
    end
+
 
 
 
