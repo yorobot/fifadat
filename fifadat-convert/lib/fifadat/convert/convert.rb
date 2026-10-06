@@ -86,47 +86,52 @@ def convert( slug:, season:,
       live     = _read_report( m, report_dir: report_dir )
       timeline = _read_timeline( m, timeline_dir: timeline_dir )
 
-      ## if live.nil?
-      ##   puts "warn no match report for #{_report_basename(m)}"
-      ## end
+
+        ###
+        ###  note live might be empty / not available!!!
+
+        if live.nil?
+            puts "!!warn - no match report for #{_report_basename(m)}"
+        else
+
+          ## try  update of score via goals from (match) report
+          score_more =  _build_report_score( live, timeline )
+           if score_more
+             rec.score = {}.merge( rec.score||{}, score_more )
+          end
 
 
-        ## try  update of score via goals from (match) report
-        score_more =  _build_report_score( live, timeline )
-        if score_more
-           rec.score = {}.merge( rec.score||{}, score_more )
-        end
+          ## reuse generated output from report
+          report =  MatchReport.build( live, timeline )
+
+          ############
+          ## add goals
+
+          if report.goals1.empty? && report.goals2.empty?
+             ## skip if no goals
+          else
+            rec.goals1 = report.goals1
+            rec.goals2 = report.goals2
+          end
 
 
-        ## reuse generated output from report
-        report =  MatchReport.build( live, timeline )
-
-       ############
-       ## add goals
-
-       if report.goals1.empty? && report.goals2.empty?
-          ## skip if no goals
-       else
-         rec.goals1 = report.goals1
-         rec.goals2 = report.goals2
-       end
+          #########
+          ## add penalties
+          rec.penalties = report.penalties   if report.penalties &&
+                                               !report.penalties.empty?
 
 
-       #########
-       ## add penalties
-       rec.penalties = report.penalties   if report.penalties &&
-                                            !report.penalties.empty?
+         sentoff1 = report.sentoff1
+         sentoff2 = report.sentoff2
+         rec.sentoff1 = sentoff1    unless sentoff1.empty?
+         rec.sentoff2 = sentoff2    unless sentoff2.empty?
 
-
-      sentoff1 = report.sentoff1
-      sentoff2 = report.sentoff2
-      rec.sentoff1 = sentoff1    unless sentoff1.empty?
-      rec.sentoff2 = sentoff2    unless sentoff2.empty?
-
-      ###
-      ##  add referees
-      rec.officials = report.officials   if report.officials && !report.officials.empty?
+         ###
+         ##  add referees
+         rec.officials = report.officials   if report.officials && !report.officials.empty?
+         end
       end
+
 
 
       recs << rec

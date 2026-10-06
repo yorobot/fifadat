@@ -89,6 +89,8 @@ end
 
 def _build_report_score( live, timeline=nil )
 
+
+
     _scores = _build_score_from_goals( live )
 
 

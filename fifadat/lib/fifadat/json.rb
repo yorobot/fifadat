@@ -72,7 +72,7 @@ def write_json_v2( path, data )
 end
 
 
-def fetch_json( url, path=nil, headers: nil )
+def fetch_json( url, path=nil, headers: nil, &blk)
   res = if headers
             Webclient.get( url, headers: headers )
         else
@@ -84,7 +84,10 @@ def fetch_json( url, path=nil, headers: nil )
     ## pp data
     puts "OK - fetching #{url}"
 
-    write_json_v2( path, data )    if path
+    ##
+    ## note - allow a (yield) block to check if json gets saved or not
+
+    write_json_v2( path, data )    if path && (blk && blk.call(data))
 
     data
   else
@@ -97,7 +100,7 @@ end
 
 
 
-def fetch_json_if( url, outpath, force: false )
+def fetch_json_if( url, outpath, force: false, &blk )
    delay_in_secs = 1   ## 1 sec
 
    if force == false && File.exist?( outpath )
@@ -105,7 +108,7 @@ def fetch_json_if( url, outpath, force: false )
      return nil
    end
 
-   data = fetch_json( url, outpath )
+   data = fetch_json( url, outpath, &blk)
    puts "  sleeping #{delay_in_secs} sec(s)..."
    sleep( delay_in_secs )
 
