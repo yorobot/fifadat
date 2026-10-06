@@ -50,9 +50,16 @@ def convert( slug:, season:,
                     version:   FifadatConvert::VERSION,
                     teams:    teams.size,
                     matches:  matches.size,
+                    matchstatus:  collect_matchstatus( matches),
                     stages:   stages.size,
                     stadiums:  stadiums.size,
                   }
+
+
+    ### add more meta data to help with finding data errors/outliers etc.
+    ##    matchstatus/resultype counts
+
+
 
    data[:stages]   = stages.as_json
    data[:teams]    = teams.as_json

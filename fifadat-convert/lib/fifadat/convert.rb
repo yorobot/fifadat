@@ -49,6 +49,7 @@ require_relative 'convert/convert-reports'
 require_relative 'convert/helper-date'
 require_relative 'convert/helper-score'
 require_relative 'convert/helper-minute'
+require_relative 'convert/helper-meta'
 
 
 
