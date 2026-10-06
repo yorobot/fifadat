@@ -12,6 +12,9 @@ opts = {
   offline: false,
   reports: true,
 
+  convert:  true,
+  download: true,
+
   cache_dir:    '/sports/cache.fifadat',
   convert_dir:  '/sports/cache.api.fifa',
 }
@@ -26,9 +29,10 @@ parser.banner = "Usage: #{$PROGRAM_NAME} [options] NAME"
    end
 
 
-  parser.on( "--cache", "--cached", "--offline",
-               "always (and only) use cached data in >#{opts[:cache_dir]}< - default is (#{opts[:offline]})" ) do |offline|
-    opts[:offline] = offline
+  ##  add  -C   -- why? why not?
+  parser.on( "--cache", "--cached", "--offline", "--convert",
+               "convert only; turn off downloads - always (and only) use cached data in >#{opts[:cache_dir]}< - default is (#{!opts[:download]})" ) do |download|
+    opts[:download] = false
   end
 
   parser.on( "--force",
@@ -40,6 +44,15 @@ parser.banner = "Usage: #{$PROGRAM_NAME} [options] NAME"
                "incl. one-by-one (detailed) match reports - default is (#{opts[:reports]})" ) do |reports|
     opts[:reports] = reports
   end
+
+  ## maybe add/use --[no-]convert - why? why not?
+  ##  add  -D   -- why? why not?
+  parser.on( "--download", "--dl",
+               "download only; turn off convert AND turn on download" ) do |download|
+    opts[:download] = true
+    opts[:convert]  = false
+  end
+
 
 
 
@@ -105,7 +118,7 @@ pp recs
     end
 
 
-  if opts[:offline] == false
+  if opts[:download] == true
     ## step 1a) prepare
    recs.each do |rec|
       slug   =  rec['league']
@@ -157,7 +170,7 @@ pp recs
 
 
 
-
+  if opts[:convert] == true
    ## step 2) convert
    recs.each do |rec|
       slug   =  rec['league']
@@ -175,6 +188,8 @@ pp recs
                                      outdir: convert_dir )
       end
    end
+  end
+
 
 puts "bye"
 

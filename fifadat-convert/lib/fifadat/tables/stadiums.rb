@@ -12,8 +12,11 @@ class Stadiums
        rec = _add( stadium )
 
        ## update match counter by team
-       team_name = desc(m['Home']['TeamName'])
-       rec.count[ team_name ] += 1
+       ##    note - m['Home'] might be nil (not yet know)
+       if m['Home']
+         team_name = desc(m['Home']['TeamName'])
+         rec.count[ team_name ] += 1
+       end
      end
    end
 
@@ -33,8 +36,33 @@ class Stadiums
    end
 
 
+   def find_or_create( h )
+       rec = find( h )
+       if rec.nil?
+          puts "warn - auto-build missing stadium:"
+          pp h
+          ## note - do NOT add stadium to lookup - why? why not?
+          stadium = Stadium.build( h )
+          pp stadium
+          rec = stadium
+       end
+       rec
+   end
 
-  def find!( h )
+
+
+   def find!( h )
+      rec = find( h )
+      if rec.nil?
+          puts "#{@recs.size} stadiums:"
+          pp @recs.keys
+          raise ArgumentError, "stadium not found using >#{id}< - #{h.pretty_inspect}"
+      end
+      rec
+   end
+
+
+  def find( h )
       if h
         name  = desc( h['Name'] )
         city  = desc( h['CityName'] )
@@ -45,18 +73,12 @@ class Stadiums
         id  =       name.downcase.gsub( /[^a-z]/, '' )
         id += "_" + city.downcase.gsub( /[^a-z]/, '' )
       else
-        puts "warn: empty stadium lookup:"
-        pp h
-        id = '<nil>'
+        puts "warn: empty (nil) stadium lookup"
+        id = Stadium::STADIUM_NIL.id
       end
 
       ## check for nil - why? why not?
        rec = @recs[ id ]
-       if rec.nil?
-          puts "#{@recs.size} stadiums:"
-          pp @recs.keys
-          raise ArgumentError, "stadium not found using >#{id}< - #{h.pretty_inspect}"
-       end
        rec
    end
 

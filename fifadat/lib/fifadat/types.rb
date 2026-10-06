@@ -55,7 +55,7 @@ MATCH_STATUS = {
 
 RESULT_TYPE = {
   0 => 'NO',
-  1 => 'REGULAR',
+  1 => 'FT',     ## was: REGULAR - changed to FT (90min)
   ## note - cannot tell if
   ##          win on penalties
   ##    is  after extra-time!!!
@@ -65,8 +65,8 @@ RESULT_TYPE = {
   2 => 'WIN_ON_PENS',    ## AET_WIN_ON_PENS or REG_WIN_ON_PENS or AGG_WIN_ON_PENS !!!!!!
   3 => 'AET',
   ##
-  ## note - agg - used for 1st & 2nd leg
-  4 => 'REGULAR/AGG',  ##  aggregate (1st/2nd leg) - regular
+  ## note - agg - used for 1st & 2nd leg!!!! (not only 2nd leg)!!!
+  4 => 'FT/AGG',      ##  aggregate (1st/2nd leg) - regular
   5 => 'AET/AGG',      ##   aggregate  - after extra-time
   ## e.g.
   ## 2nd Leg Feb 25, 2026 Juventus 3–2 (AET) Galatasaray

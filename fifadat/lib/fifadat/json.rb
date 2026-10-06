@@ -68,6 +68,7 @@ def write_json_v2( path, data )
     ## double check for syntax errors
     json = JSON.parse( txtjson )
 
+    puts "  writing json to >#{path}<"
     write_text( path, txtjson )
 end
 
@@ -87,7 +88,10 @@ def fetch_json( url, path=nil, headers: nil, &blk)
     ##
     ## note - allow a (yield) block to check if json gets saved or not
 
-    write_json_v2( path, data )    if path && (blk && blk.call(data))
+    if path
+      write_json_v2( path, data )   if blk.nil? || (blk && blk.call(data))
+    end
+
 
     data
   else

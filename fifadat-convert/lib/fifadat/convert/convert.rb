@@ -1,4 +1,16 @@
 
+## helper to check if live match data has goals data
+def _live_goals?( live )
+   (live['HomeTeam']['Score'] != 0    ||  live['AwayTeam']['Score'] != 0) &&
+   (!live['HomeTeam']['Goals'].empty? || !live['AwayTeam']['Goals'].empty?)
+end
+
+##  use _live_details or such - why? why not?
+def _live_players?( live )
+   !live['HomeTeam']['Players'].empty? && !live['AwayTeam']['Players'].empty?
+end
+
+
 
 
 def convert( slug:, season:,
@@ -94,12 +106,21 @@ def convert( slug:, season:,
             puts "!!warn - no match report for #{_report_basename(m)}"
         else
 
-          ## try  update of score via goals from (match) report
-          score_more =  _build_report_score( live, timeline )
-           if score_more
-             rec.score = {}.merge( rec.score||{}, score_more )
-          end
 
+    ### note - check if live match report
+    ##         has basic coverage
+    ##          that is, goals ??
+    ##                   players ??
+        if _live_goals?( live )
+            ## try  update of score via goals from (match) report
+            score_more =  _build_report_score( live, timeline )
+            if score_more
+               rec.score = {}.merge( rec.score||{}, score_more )
+            end
+        end
+
+
+        if _live_players?( live )
 
           ## reuse generated output from report
           report =  MatchReport.build( live, timeline )
@@ -129,10 +150,13 @@ def convert( slug:, season:,
          ###
          ##  add referees
          rec.officials = report.officials   if report.officials && !report.officials.empty?
+
+          else
+            puts "!! warn - no players found in (live) match report #{_report_basename(m)} with coverage #{live['CoverageLevel']}"
+          end
+
          end
       end
-
-
 
       recs << rec
    end

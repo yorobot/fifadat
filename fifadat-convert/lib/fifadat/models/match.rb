@@ -98,7 +98,7 @@ def self.build( m, teams:, stadiums:, stages: )   ## use _fill/build_match_basic
 
 
        ## add country to stadium too - why? why not?
-       rec[:stadium] = stadiums.find!( m['Stadium'] )
+       rec[:stadium] = stadiums.find_or_create( m['Stadium'] )
 
 
        attendance = m['Attendance']

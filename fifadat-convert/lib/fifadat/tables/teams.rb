@@ -39,8 +39,14 @@ class Teams        ## use/change to TeamsRegistry, TeamsLookup, etc
       ##  team2 = teams.find( m['AwayTeam'] )
       ##  use lookup by  "IdTeam": "33161" for now - why? why not?
 
-      ## check for nil - why? why not?
-       rec = @recs[ h['IdTeam'] ]
+       id =  if h
+               h['IdTeam']
+             else
+               ##  note - check for nil e.g. h['Home'] is nil etc.
+               puts "warn: empty (nil) team lookup"
+               Team::TEAM_NIL.id
+             end
+       rec = @recs[ id ]
        raise ArgumentError, "team not found using #{h.pretty_inspect}  "  if rec.nil?
        rec
    end

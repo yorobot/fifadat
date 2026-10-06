@@ -93,8 +93,8 @@ def _build_report_score( live, timeline=nil )
 
     _scores = _build_score_from_goals( live )
 
-
     score = nil
+
 
      case live['ResultType']
      when 1,4

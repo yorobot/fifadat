@@ -60,20 +60,6 @@ def convert_reports( slug:, season:,
       timeline = _read_timeline( m, timeline_dir: timeline_dir )
 
 
-      rec    = Match.build( live,   teams:    teams,
-                                    stadiums: stadiums,
-                                    stages:   stages )
-
-
-       ## try  update of score via goals from (match) report
-        score_more =  _build_report_score( live, timeline )
-        if score_more
-           rec.score = {}.merge( rec.score||{}, score_more )
-        end
-
-
-      report = MatchReport.build( live, timeline )
-
       data = {
                meta: {
                   name: desc(live['SeasonName']),
@@ -83,14 +69,35 @@ def convert_reports( slug:, season:,
                }
             }
 
-      data = data.merge( rec.as_json, report.as_json )
+      rec    = Match.build( live,   teams:    teams,
+                                    stadiums: stadiums,
+                                    stages:   stages )
 
 
-      ## build basename e.g  2026-07-15_ARG-ENG
-      basename = _report_basename( m )
-      outpath = "#{outdir}/#{season.to_path}/#{slug}/#{basename}.json"
-      write_json( outpath, data )
+      if _live_goals?( live )
+             ## try  update of score via goals from (match) report
+         score_more =  _build_report_score( live, timeline )
+        if score_more
+           rec.score = {}.merge( rec.score||{}, score_more )
+        end
+      end
+
+
+      if _live_players?( live )
+        report = MatchReport.build( live, timeline )
+
+        data = data.merge( rec.as_json, report.as_json )
+
+        ## build basename e.g  2026-07-15_ARG-ENG
+        basename = _report_basename( m )
+        outpath = "#{outdir}/#{season.to_path}/#{slug}/#{basename}.json"
+        write_json( outpath, data )
+
+
+      else
+         puts "!! warn - skipping generate match report; no players found in (live) match report #{_report_basename(m)} with coverage #{live['CoverageLevel']}"
+      end
    end
 
-   print "DONE\n"
+   print " DONE\n"
 end
