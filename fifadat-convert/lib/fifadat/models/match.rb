@@ -58,6 +58,31 @@ def self.build( m, teams:, stadiums:, stages: )   ## use _fill/build_match_basic
          ## note - use  20:30 UTC+1  or 20:30 UTC-3  for timezone format for now
          rec[:date_local] = localDateTime.strftime( '%Y-%m-%d' )
          rec[:time_local] = _fmt_time_local( dateTime, localDateTime )
+
+###
+##  check for timezone bug
+##    if stadium  "IdCity"  is null
+##     than localDateTime is same as utc!!!!
+##
+##     issue warning  and maybe later track cities etc.
+##
+## e.g.   "Date": "2025-08-24T13:00:00Z",
+##    "LocalDate": "2025-08-24T13:00:00Z",
+     if  m['Date']==m['LocalDate'] &&
+        (m['Stadium'] && m['Stadium']['IdCity'].nil?)
+
+        puts "!! WARN - timezone bug (IdCity is nil):"
+        pp m['Stadium']
+
+        ## todo/fix
+        ##   get timezone obj for city, country
+        ##     e.g. Liverpool  | ENG
+        ##          Sunderland | ENG
+        ##          Liverpool, Merseyside | ENG
+        ##
+     end
+
+
        else
          ## note - uses
          ## todo/fix - assert  that utc  hour/minute is 00:00 e.g.

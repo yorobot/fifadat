@@ -51,6 +51,7 @@ require_relative 'convert/helper-score'
 require_relative 'convert/helper-minute'
 require_relative 'convert/helper-meta'
 
+require_relative 'convert/update-score'
 
 
 require_relative 'models/stage'

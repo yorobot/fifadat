@@ -117,8 +117,8 @@ def self._build_ary( recs, players:,
 
      recs = recs.select do |h|
                               if h['Period'] == 11   ## penalty shoot-out
-                                assert( [0,2,3,6,7,8,41,46,51,60,65].include?( h['Type'] ),
-                                   "expected event type 2/3/7/8/41/46/51/60/65 for pens; got #{h.pretty_inspect}"
+                                assert( [0,2,3,6,7,8,9,10,41,46,51,60,65].include?( h['Type'] ),
+                                   "expected event type 2/3/7/8/9/10/41/46/51/60/65 for pens; got #{h.pretty_inspect}"
                                  )
                                 [0,41,46,51,60,65].include?( h['Type'] ) ? true : false
                               else

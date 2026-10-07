@@ -26,5 +26,7 @@ require_relative 'fifadat/types'
 require_relative 'fifadat/prepare'   ## "all-in-one" prepare (download cache) helpers etc.
 require_relative 'fifadat/prepare_reports'
 
+require_relative 'fifadat/logger'
+
 
 puts Fifadat.banner  ## say hello

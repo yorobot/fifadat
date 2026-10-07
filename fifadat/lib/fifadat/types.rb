@@ -117,6 +117,8 @@ EVENT_TYPE = {
   6 => 'Penalty Awarded',
   7 =>  'Start Time',      ## e.g. The referee signals the start of the first period.
   8 =>  'End Time',        ## e.g. 'The referee brings the first period to an end.
+  9 => 'Pause Time',       ## e.g. The referee has paused the match
+  10 => 'Resume Time',     ## e.g. The referee has resumed the match
 
   12 => 'Attempt at Goal',
 

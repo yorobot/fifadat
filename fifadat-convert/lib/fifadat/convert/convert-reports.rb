@@ -75,11 +75,8 @@ def convert_reports( slug:, season:,
 
 
       if _live_goals?( live )
-             ## try  update of score via goals from (match) report
-         score_more =  _build_report_score( live, timeline )
-        if score_more
-           rec.score = {}.merge( rec.score||{}, score_more )
-        end
+         ## try  update of score via goals from (match) report
+         rec.score = _update_score( rec.score, live: live, timeline: timeline )
       end
 
 

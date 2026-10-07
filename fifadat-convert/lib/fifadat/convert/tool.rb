@@ -2,6 +2,32 @@
 
 module Fifadat
 
+
+class Logger
+  def initialize( path )
+     @path = path
+  end
+
+  def log( msg )
+     ## append msg to ./fifadat.log
+     ##
+     ##  change to /logs-fifadat.txt or such - why? why not?
+     ##     keep .txt extension; prefer over .log - why? why not?
+     File.open( @path, 'a:utf-8' ) do |f|
+       f.write( "#{_timestamp} - " + msg )
+       f.write( "\n" )
+    end
+  end
+
+  def _timestamp
+     Time.now.strftime( '%a %b %d %h:%m %Y' )
+  end
+end   ## class Logger
+
+
+
+
+
 def self.main( args=ARGV )
 
 
@@ -77,6 +103,10 @@ cache_dir    = opts[:cache_dir]
 convert_dir  = opts[:convert_dir]
 
 
+## or use downloads.log  - why? why not?
+history = Logger.new( "#{cache_dir}/logs-downloads.txt" )
+
+
 
 if opts[:file]
    recs = read_csv( opts[:file] )
@@ -150,6 +180,9 @@ pp recs
         puts "  written to >#{outpath}<"
 =end
       end
+
+      ###  log downloads
+      history.log( "prepare #{rec['league']} #{rec['seasons']}" )
     end
 
     if opts[:reports]
@@ -164,6 +197,9 @@ pp recs
                          outdir:  cache_dir,    ## note - autoadd slug (name) e..g ./eng !!
                          force: opts[:force] )
         end
+
+        history.log( "prepare_reports #{rec['league']} #{rec['seasons']}")
+
       end
     end # if reports
   end  ## if online (offline==false)
@@ -194,6 +230,10 @@ pp recs
 puts "bye"
 
 end
+
+
+
+
 
 
 end  # module Fifadat
